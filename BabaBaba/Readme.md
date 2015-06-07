@@ -1,1 +1,1 @@
-BabaBaba is a 16-bit Bomberman clone
+BabaBaba is a 2D Bomberman clone
