@@ -1,0 +1,1 @@
+I'll be copying most of the scripts from my Unity3D game projects here to keep them open source and freely available. If you have any questions on how to use them, please feel free to email me.
