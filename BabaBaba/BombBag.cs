@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using BabaBaba;
 
 public class BombBag : MonoBehaviour {
 
@@ -31,7 +32,8 @@ public class BombBag : MonoBehaviour {
 
 	private void PlaceBomb()
 	{
-		GameObject bombObject = (GameObject)GameObject.Instantiate (Bomb, this.transform.position, Quaternion.identity);
+		Vector3 bombPosition = Utils.SnapToGrid (this.transform.position);
+		GameObject bombObject = (GameObject)GameObject.Instantiate (Bomb, bombPosition, Quaternion.identity);
 		Bomb bomb = bombObject.GetComponent<Bomb> ();
 		bomb.BombBag = this;
 		this._BombsPlaced++;

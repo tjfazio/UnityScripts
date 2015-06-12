@@ -7,14 +7,12 @@ public class BombSpark : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D collider)
 	{
-		if (collider.gameObject.CompareTag ("Bombable")) {
-			Debug.Log ("BombSpark hit bombable " + collider.gameObject.name);
-			collider.gameObject.SendMessage ("OnBombHit");
-		} else if (collider.gameObject.CompareTag ("Indestructible")) {
+		if (collider.gameObject.CompareTag ("Indestructible")) {
 			Debug.Log ("BombSpark hit indestructible " + collider.gameObject.name);
 			this.Fizzle();
 		} else {
-			Debug.Log ("BombSpark hit " + collider.gameObject.name);
+			Debug.Log ("BombSpark hit " + collider.gameObject.name);			
+			collider.gameObject.SendMessage ("OnBombHit");
 		}
 	}
 

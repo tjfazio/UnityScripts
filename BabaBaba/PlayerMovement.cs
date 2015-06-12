@@ -4,32 +4,31 @@ using BabaBaba;
 
 public class PlayerMovement : MonoBehaviour {
 
-	public float MoveTime = 0.1f;
+	private static readonly Vector2 IdleDirection = new Vector2 (0f, -1f);
+
+	public float Speed = 2.0f;
 	public LayerMask BlockingLayer;
 
-	private Rigidbody2D _Rigidbody;
+	public Vector2 Direction { get { return this._Direction; } }
+	
+	private BoxCollider2D _Collider;
 	private Animator _Animator;
-	private float _InverseMoveTime;
-	private bool _IsMoving;
-
+	private int _LastAnimationDirection;
+	private Vector2 _Direction;
+	
 	void Start () 
 	{
-		this._Rigidbody = this.GetComponent<Rigidbody2D>();
+		this._Collider = this.GetComponent<BoxCollider2D>();
 		this._Animator = this.GetComponent<Animator> ();
-		this._InverseMoveTime = 1f / this.MoveTime;
-		this._IsMoving = false;
+		this._LastAnimationDirection = 0;
+		this._Direction = IdleDirection;
 	}
 	
 	void Update () 
 	{		
-		if (this._IsMoving)
-		{
-			return;
-		}
-
-		int horizontal = (int) Input.GetAxisRaw("Horizontal");
-		int vertical = (int) Input.GetAxisRaw ("Vertical");
-
+		float horizontal = Input.GetAxisRaw("Horizontal");
+		float vertical = Input.GetAxisRaw ("Vertical");
+		
 		if (vertical != 0)
 		{
 			horizontal = 0;
@@ -44,42 +43,24 @@ public class PlayerMovement : MonoBehaviour {
 		}
 	}
 	
-	private void Move(int horizontal, int vertical)
+	private void Move(float horizontal, float vertical)
 	{		
-		Vector2 direction = new Vector2(horizontal, vertical) * Constants.BlockSize;
-		Vector2 start = this.transform.position;
-		Vector2 end = start + direction;
+		Vector2 direction = new Vector2 (horizontal, vertical);
+		float distance = this.Speed * Time.deltaTime;
 
-		RaycastHit2D hit = Physics2D.Linecast (start,end, this.BlockingLayer);
-
-		if (null == hit.transform)
-		{
-			this._IsMoving = true;
-			this.AnimateMovement(horizontal, vertical);
-			StartCoroutine(SmoothMovement(end));
-		}
-		else
-		{
-			this._IsMoving = false;
-		}
-	}
-
-	private IEnumerator SmoothMovement(Vector3 end)
-	{
-		float sqrRemainingDistance = (transform.position - end).sqrMagnitude;
+		Vector2 start = (Vector2)this._Collider.transform.position + this._Collider.offset;
+		RaycastHit2D hit = Physics2D.BoxCast (start, this._Collider.size, 0, direction, distance, this.BlockingLayer);
 		
-		while (sqrRemainingDistance > float.Epsilon) 
-		{
-			Vector3 newPosition = Vector3.MoveTowards(this._Rigidbody.position, end, this._InverseMoveTime * Time.deltaTime);
-			this._Rigidbody.MovePosition(newPosition);
-			sqrRemainingDistance = (transform.position - end).sqrMagnitude;
-			yield return null;
+		this.AnimateMovement (horizontal, vertical);
+		if (null != hit.transform) {
+			return;
 		}
-		this._IsMoving = false;
-		yield return null;
+		
+		Vector2 displacement = direction * distance;
+		this.transform.position += (Vector3)displacement;
 	}
 	
-	private void AnimateMovement(int horizontal, int vertical)
+	private void AnimateMovement(float horizontal, float vertical)
 	{
 		int direction = 0;
 		if (vertical > 0)
@@ -98,11 +79,18 @@ public class PlayerMovement : MonoBehaviour {
 		{
 			direction = 3;
 		}
+		if (this._LastAnimationDirection == direction) {
+			return;
+		}
+		this._LastAnimationDirection = direction;
+		this._Direction = new Vector2 (horizontal, vertical);
 		this._Animator.SetInteger ("Direction", direction);
 	}
 	
 	private void Idle()
 	{	
+		this._LastAnimationDirection = 0;
+		this._Direction = IdleDirection;
 		this._Animator.SetInteger("Direction", 0);
 	}
 }

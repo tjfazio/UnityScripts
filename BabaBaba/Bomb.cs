@@ -27,7 +27,7 @@ public class Bomb : MonoBehaviour {
 	{
 		if (!this._IsExploding && Time.time >= this._TimeToExplode) 
 		{
-			this.SpawnSparks ();
+			this.Explode ();
 		}
 		if (Time.time >= this._TimeToDestroy) 
 		{
@@ -35,8 +35,13 @@ public class Bomb : MonoBehaviour {
 		}	
 	}
 
-	private void SpawnSparks()
+	private void Explode()
 	{
+		if (this._IsExploding) 
+		{
+			return;
+		}
+		this._IsExploding = true;
 		this.SpawnSparkLine (new Vector2 (1f, 0f));
 		this.SpawnSparkLine (new Vector2 (0f, 1f));
 		this.SpawnSparkLine (new Vector2 (-1f, 0f));
@@ -45,7 +50,6 @@ public class Bomb : MonoBehaviour {
 
 	private void SpawnSparkLine(Vector2 direction)
 	{
-		this._IsExploding = true;
 		for (int i = 0; i < this.Magnitude; i++) 
 		{
 			Vector3 displacement = direction * (i + 1) * Constants.BlockSize;
@@ -77,5 +81,11 @@ public class Bomb : MonoBehaviour {
 		Debug.Log ("Bomb: Fizzle");
 		this._Sparks.Remove (spark.gameObject);
 		Destroy (spark.gameObject);
+	}
+
+	public void OnBombHit()
+	{
+		Debug.Log ("Bomb: OnBombHit");
+		this.Explode ();
 	}
 }
